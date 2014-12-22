@@ -25,7 +25,9 @@ conts = fileNames >>= (return . fmap (("/usr/share/dict/"++)))
 main = do
   x <- conts >>= mapM readFile 
   let dict = filter (liftA2 (&&) ((< upper).length) ((> lower).length)) (x >>= words)
-  putStrLn (show . length $ dict)
-  -- entropy is (log(length dict)/log(2))^len
-  y <- pick dict
-  putStrLn y
+  let dictLen = fromIntegral $ length $ dict
+  let entropy = (log(dictLen) / log(2)) ^ (len)
+  -- ruby "join" 
+  mapM_ (>>= putStr . (++" ")) ((pick' len dict))
+  putStrLn ""
+  putStrLn $  "entropy is " ++ show entropy
