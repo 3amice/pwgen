@@ -1,26 +1,21 @@
 import System.Directory
+import System.Random (randomRIO)
 import Control.Applicative
  
-import System.Random (randomRIO)
-
-pick :: [a] -> IO a
-pick xs = randomRIO (0, length xs - 1) >>= return . (xs !!)
-
-pick' :: Int -> [a] -> [IO a]
-pick' 0 xs = []
-pick' i xs = (pick xs) : (pick' (i-1) xs)
- 
-upper  = 20 
+upper  = 10
 lower  = 5 
-len    = 5
+len    = 3 
 
-fileNames = do 
+pick :: Int -> [a] -> [IO a]
+pick 0 xs = []
+pick i xs = (pick' xs) : (pick (i-1) xs)
+  where
+    pick' :: [a] -> IO a
+    pick' xs = randomRIO (0, length xs - 1) >>= return . (xs !!)
+ 
+conts = do 
   fs <- getDirectoryContents "/usr/share/dict"
-  return . filter (liftA2 (&&) (/=".") (/="..")) $ fs
-
--- Conts is fileName:s absolute paths.
-conts :: IO [[Char]]
-conts = fileNames >>= (return . fmap (("/usr/share/dict/"++))) 
+  return . (fmap ("/usr/share/dict/"++)) . filter (liftA2 (&&) (/=".") (/="..")) $ fs
 
 main = do
   x <- conts >>= mapM readFile 
@@ -28,6 +23,6 @@ main = do
   let dictLen = fromIntegral $ length $ dict
   let entropy = (log(dictLen) / log(2)) ^ (len)
   -- ruby "join" 
-  mapM_ (>>= putStr . (++" ")) ((pick' len dict))
+  mapM_ (>>= putStr . (++" ")) ((pick len dict))
   putStrLn ""
   putStrLn $  "entropy is " ++ show entropy
