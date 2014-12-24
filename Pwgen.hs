@@ -1,6 +1,7 @@
 import System.Directory
 import System.Random (randomRIO)
 import Control.Applicative
+import Control.Monad
  
 upper  = 10
 lower  = 5 
@@ -14,14 +15,9 @@ pick i xs = (pick' xs) : (pick (i-1) xs)
     pick' xs = randomRIO (0, length xs - 1) >>= return . (xs !!)
  
 files = do 
-  fs <- getDirectoryContents "/usr/share/dict"
-  return . (fmap ("/usr/share/dict/"++)) . filter (liftA2 (&&) (/=".") (/="..")) $ fs
-
-addMon :: IO String -> IO String -> IO String
-addMon x y = x >>= (first y)
-  where 
-    first :: IO String -> String -> IO String
-    first y x = y >>= (\t -> return (x ++ ' ':t))
+  let dict = "/usr/share/dict/"
+  fs <- getDirectoryContents dict
+  return . (fmap (dict++)) . filter (liftA2 (&&) (/=".") (/="..")) $ fs
 
 
 main = do
@@ -29,6 +25,6 @@ main = do
   let dict = filter (liftA2 (&&) ((< upper).length) ((> lower).length)) (x >>= words)
   let dictLen = fromIntegral $ length $ dict 
   let entropy = (log(dictLen) / log(2)) ^ (len)
-  let pws = foldr (addMon) (return "") $ pick len dict
+  let pws = foldr1 (liftM2 (flip (++) . (' ':))) $ pick len dict
   pws >>= putStrLn 
-  putStrLn $  "entropy is " ++ show entropy
+  putStrLn $ "entropy is " ++ show entropy
