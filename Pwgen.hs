@@ -1,3 +1,5 @@
+module Pwgen (genPw) where  
+
 import System.Directory
 import System.Random (randomRIO)
 import Control.Applicative
