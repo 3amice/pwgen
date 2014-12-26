@@ -31,10 +31,3 @@ genPw lowerWordLength upperWordLength len = do
   pws <- foldr1 (liftM2 (flip (++) . (' ':))) $ pick len dict
   let letterEntropy = (/(log 2)) . log . (^) 26 . fromIntegral . length $ pws
   return (map toLower $ pws, dictEntropy, letterEntropy)
-
-main = do
-  (pw, dictEntropy, letterEntropy) <- genPw 1 10 5
-  putStrLn pw
-  putStrLn $ "dictEntropy  : " ++ (show dictEntropy)
-  putStrLn $ "letterEntropy: " ++ (show letterEntropy)
-  return ()
